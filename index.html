@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc Mừng Sinh Nhật</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Màn hình chờ với dòng chữ "Bạn đã sẵn sàng chưa?" */
+        #start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ff69b4;
+            cursor: pointer;
+            text-align: center;
+            transition: opacity 0.8s ease;
+            padding: 20px;
+        }
+
+        #start-overlay h1 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #ff1493, 0 0 25px #ff1493;
+            letter-spacing: 2px;
+        }
+
+        #start-overlay p {
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.98); }
+        }
+
+        /* Khung chứa ảnh bay lơ lửng */
+        .photo-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            display: none;
+        }
+
+        .floating-photo {
+            position: absolute;
+            width: 75px;
+            height: 75px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 105, 180, 0.9);
+            box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
+            animation: floatAround 14s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translateY(105vh) scale(0.7); opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
+        }
+
+        .content-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            text-align: center;
+            color: #ff69b4;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 30px #ff69b4;
+            transition: opacity 0.5s ease-in-out;
+            width: 90%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình chờ ban đầu -->
+    <div id="start-overlay">
+        <h1>✨ Bạn đã sẵn sàng chưa? ✨</h1>
+        <p>[ Chạm vào đây để nhận bất ngờ ]</p>
+    </div>
+
+    <canvas id="matrixCanvas"></canvas>
+    
+    <div class="photo-container" id="photoContainer"></div>
+    <div class="content-box" id="message"></div>
+
+    <audio id="bgMusic" loop>
+        <source src="nhac.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let currentMode = 'matrix'; 
+
+        function getHeartPoint(t, scale = 15) {
+            const x = scale * 16 * Math.pow(Math.sin(t), 3);
+            const y = -scale * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+            return { x: window.innerWidth / 2 + x, y: window.innerHeight / 2 + y };
+        }
+
+        const characters = "HAPPYBIRTHDAY❤️0123456789ABCDEFANHQUYNH";
+        const fontSize = 16;
+        let columns = canvas.width / fontSize;
+        const drops = [];
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawLoop() {
+            if (currentMode === 'matrix') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ff69b4';
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            } else if (currentMode === 'photos') {
+                ctx.fillStyle = 'rgba(5, 5, 5, 0.3)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (currentMode === 'heart') {
+                ctx.fillStyle = 'rgba(5, 5, 5, 0.15)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#ff1493';
+                ctx.font = '14px monospace';
+                
+                for (let i = 0; i < 250; i++) {
+                    const t = Math.random() * Math.PI * 2;
+                    const scale = window.innerWidth < 600 ? 10 : 18; 
+                    const p = getHeartPoint(t, scale);
+                    const char = characters.charAt(Math.floor(Math.random() * characters.length));
+                    ctx.fillText(char, p.x + (Math.random() - 0.5) * 30, p.y + (Math.random() - 0.5) * 30);
+                }
+            }
+        }
+        setInterval(drawLoop, 33);
+
+        const messages = [
+            "3", "2", "1",
+            "HAPPY BIRTHDAY",
+            "NGUYỄN NGỌC MINH PHƯƠNG", 
+            "22/10/2009",     
+            "CHÚC BẠN MỘT NGÀY SINH NHẬT",
+            "THẬT NHIỀU NIỀM VUI",
+            "HẠNH PHÚC",
+            "VÀ SỚM THỰC HIỆN ĐƯỢC ƯỚC MƠ CỦA MÌNH",
+            "TRONG TƯƠNG LAI NHÓ",
+            "HEHEHEHE",
+            "❤️"
+        ];
+
+        const messageElement = document.getElementById('message');
+        const photoContainer = document.getElementById('photoContainer');
+        const bgMusic = document.getElementById('bgMusic');
+        const startOverlay = document.getElementById('start-overlay');
+        let msgIndex = 0;
+
+        const photoFiles = ['anh1.jpg', 'anh2.jpg', 'anh3.jpg', 'anh4.jpg', 'anh5.jpg', 'anh6.jpg', 'anh7.jpg', 'anh8.jpg', 'anh9.jpg', 'anh10.jpg', 'anh11.jpg', 'anh12.jpg', 'anh13.jpg', 'anh14.jpg', 'anh15.jpg']; 
+
+        function spawnPhoto() {
+            if (currentMode === 'matrix' || photoFiles.length === 0) return;
+            const img = document.createElement('img');
+            img.src = photoFiles[Math.floor(Math.random() * photoFiles.length)];
+            img.className = 'floating-photo';
+            img.style.left = Math.random() * 85 + 'vw';
+            img.style.animationDuration = (Math.random() * 6 + 8) + 's';
+            img.onerror = function() { this.style.display = 'none'; };
+
+            photoContainer.appendChild(img);
+            setTimeout(() => { img.remove(); }, 14000);
+        }
+        setInterval(spawnPhoto, 900);
+
+        function showNextMessage() {
+            if (msgIndex < messages.length) {
+                messageElement.style.opacity = 0;
+                setTimeout(() => {
+                    if (messages[msgIndex] === "MI OIIIIII") {
+                        currentMode = 'photos';
+                        photoContainer.style.display = 'block';
+                    }
+
+                    messageElement.innerText = messages[msgIndex];
+                    messageElement.style.opacity = 1;
+                    msgIndex++;
+                    
+                    let delay = (msgIndex <= 3) ? 1000 : 2600;
+                    setTimeout(showNextMessage, delay);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    messageElement.style.opacity = 0;
+                    currentMode = 'heart';
+                    setTimeout(() => {
+                        messageElement.innerText = "❤️ ĐẸP GÁI THẾ ❤️";
+                        messageElement.style.opacity = 1;
+                    }, 1000);
+                }, 2000);
+            }
+        }
+
+        // Khi bấm vào "Bạn đã sẵn sàng chưa?", nhạc cất lên và đếm ngược bắt đầu
+        startOverlay.addEventListener('click', () => {
+            bgMusic.play().catch(e => console.log(e));
+            startOverlay.style.opacity = 0;
+            setTimeout(() => {
+                startOverlay.style.display = 'none';
+                showNextMessage(); 
+            }, 800);
+        });
+    </script>
+</body>
+</html>
