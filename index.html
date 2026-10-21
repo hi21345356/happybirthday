@@ -24,7 +24,52 @@
             z-index: 1;
         }
 
-        /* Màn hình chờ với dòng chữ "Bạn đã sẵn sàng chưa?" */
+        /* Khung chứa ảnh bay lơ lửng */
+        .photo-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: none; /* Chỉ bật lên khi đến đoạn trái tim */
+        }
+
+        .floating-photo {
+            position: absolute;
+            width: 75px;
+            height: 75px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(255, 105, 180, 0.9);
+            box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
+            animation: floatAround 14s infinite linear;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translateY(105vh) scale(0.7); opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
+        }
+
+        .content-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            text-align: center;
+            color: #ff69b4;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 30px #ff69b4;
+            transition: opacity 0.5s ease-in-out;
+            width: 90%;
+            pointer-events: none;
+        }
+
         #start-overlay {
             position: absolute;
             top: 0;
@@ -62,57 +107,10 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.98); }
         }
-
-        /* Khung chứa ảnh bay lơ lửng */
-        .photo-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-            display: none;
-        }
-
-        .floating-photo {
-            position: absolute;
-            width: 75px;
-            height: 75px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 2px solid rgba(255, 105, 180, 0.9);
-            box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
-            animation: floatAround 14s infinite linear;
-        }
-
-        @keyframes floatAround {
-            0% { transform: translateY(105vh) scale(0.7); opacity: 0; }
-            15% { opacity: 1; }
-            85% { opacity: 1; }
-            100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
-        }
-
-        .content-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-            text-align: center;
-            color: #ff69b4;
-            font-size: 2.2rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493, 0 0 30px #ff69b4;
-            transition: opacity 0.5s ease-in-out;
-            width: 90%;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Màn hình chờ ban đầu -->
     <div id="start-overlay">
         <h1>✨ Bạn đã sẵn sàng chưa? ✨</h1>
         <p>[ Chạm vào đây để nhận bất ngờ ]</p>
@@ -169,9 +167,6 @@
                     }
                     drops[i]++;
                 }
-            } else if (currentMode === 'photos') {
-                ctx.fillStyle = 'rgba(5, 5, 5, 0.3)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else if (currentMode === 'heart') {
                 ctx.fillStyle = 'rgba(5, 5, 5, 0.15)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -195,13 +190,12 @@
             "HAPPY BIRTHDAY",
             "NGUYỄN NGỌC MINH PHƯƠNG", 
             "22/10/2009",     
-            "CHÚC BẠN MỘT NGÀY SINH NHẬT",
-            "THẬT NHIỀU NIỀM VUI",
-            "HẠNH PHÚC",
-            "VÀ SỚM THỰC HIỆN ĐƯỢC ƯỚC MƠ CỦA MÌNH",
-            "TRONG TƯƠNG LAI NHÓ",
-            "HEHEHEHE",
-            "❤️"
+            "Chúc bạn tuổi mới",
+            "Luôn vui vẻ và hạnh phúc",
+            "Ngày nào cũng vậy nha",
+            "Còn những dự định trong tương lai",
+            "Đều thành công rực rỡ nhó",
+            "😆 HẸ HẸ HẸ😆"
         ];
 
         const messageElement = document.getElementById('message');
@@ -210,16 +204,21 @@
         const startOverlay = document.getElementById('start-overlay');
         let msgIndex = 0;
 
-        const photoFiles = ['anh1.jpg', 'anh2.jpg', 'anh3.jpg', 'anh4.jpg', 'anh5.jpg', 'anh6.jpg', 'anh7.jpg', 'anh8.jpg', 'anh9.jpg', 'anh10.jpg', 'anh11.jpg', 'anh12.jpg', 'anh13.jpg', 'anh14.jpg', 'anh15.jpg']; 
+        const photoFiles = [
+            'anh1.jpg', 'anh2.jpg', 'anh3.jpg', 'anh4.jpg', 'anh5.jpg', 
+            'anh6.jpg', 'anh7.jpg', 'anh8.jpg', 'anh9.jpg', 'anh10.jpg', 
+            'anh11.jpg', 'anh12.jpg', 'anh13.jpg', 'anh14.jpg', 'anh15.jpg'
+        ]; 
 
         function spawnPhoto() {
-            if (currentMode === 'matrix' || photoFiles.length === 0) return;
+            if (currentMode !== 'heart' || photoFiles.length === 0) return;
             const img = document.createElement('img');
             img.src = photoFiles[Math.floor(Math.random() * photoFiles.length)];
             img.className = 'floating-photo';
             img.style.left = Math.random() * 85 + 'vw';
             img.style.animationDuration = (Math.random() * 6 + 8) + 's';
-            img.onerror = function() { this.style.display = 'none'; };
+            
+            img.onerror = function() { this.remove(); };
 
             photoContainer.appendChild(img);
             setTimeout(() => { img.remove(); }, 14000);
@@ -230,11 +229,6 @@
             if (msgIndex < messages.length) {
                 messageElement.style.opacity = 0;
                 setTimeout(() => {
-                    if (messages[msgIndex] === "MI OIIIIII") {
-                        currentMode = 'photos';
-                        photoContainer.style.display = 'block';
-                    }
-
                     messageElement.innerText = messages[msgIndex];
                     messageElement.style.opacity = 1;
                     msgIndex++;
@@ -245,16 +239,16 @@
             } else {
                 setTimeout(() => {
                     messageElement.style.opacity = 0;
-                    currentMode = 'heart';
+                    currentMode = 'heart'; // Chuyển sang hiệu ứng trái tim
+                    photoContainer.style.display = 'block'; // Bắt đầu bật ảnh bay từ đây
                     setTimeout(() => {
-                        messageElement.innerText = "❤️ ĐẸP GÁI THẾ ❤️";
+                        messageElement.innerText = "❤️ AI ĐẸP GÁI VẬY ❤️";
                         messageElement.style.opacity = 1;
                     }, 1000);
                 }, 2000);
             }
         }
 
-        // Khi bấm vào "Bạn đã sẵn sàng chưa?", nhạc cất lên và đếm ngược bắt đầu
         startOverlay.addEventListener('click', () => {
             bgMusic.play().catch(e => console.log(e));
             startOverlay.style.opacity = 0;
